@@ -12,7 +12,7 @@ const questionSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['technical', 'project', 'internship', 'behavioral'],
+    enum: ['technical', 'project', 'internship', 'experience', 'behavioral'],
     required: true
   },
   order: {

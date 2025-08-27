@@ -55,8 +55,19 @@ router.post('/upload', auth, upload.single('resume'), async (req, res) => {
     // Parse the file
     const resumeText = await resumeParser.parseFile(req.file.path, req.file.mimetype);
 
-    // Use AI to extract structured data
-    const parsedData = await aiService.parseResume(resumeText);
+    // Use AI to extract structured data; if it fails, use heuristic parsing
+    let parsedData;
+    try {
+      parsedData = await aiService.parseResume(resumeText);
+    } catch (aiError) {
+      console.error('AI parsing failed, using heuristic fallback:', aiError.message);
+      parsedData = resumeParser.extractStructuredFallback(resumeText);
+    }
+
+    // Ensure we have valid data structure
+    if (!parsedData || !parsedData.skills || !Array.isArray(parsedData.skills)) {
+      parsedData = resumeParser.extractStructuredFallback(resumeText);
+    }
 
     // Save to database
     const resume = new Resume({

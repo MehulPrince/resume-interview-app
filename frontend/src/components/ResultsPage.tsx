@@ -25,6 +25,12 @@ type SummaryResponse = {
     transcript: string;
     evaluation: any;
     duration: number;
+    videoAnalysis?: {
+      notes?: string;
+      attentionLostSeconds?: number;
+      multipleFacesDetected?: boolean;
+      noFaceDetected?: boolean;
+    };
   }>;
 };
 
@@ -152,6 +158,86 @@ const ResultsPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Per-question details from summary */}
+                <div className="mt-6">
+                  <h3 className="text-md font-semibold text-gray-900">
+                    Per-question details
+                  </h3>
+                  <ul className="mt-3 space-y-3">
+                    {summary.responses.map((r, i) => (
+                      <li key={i} className="p-4 rounded bg-gray-50">
+                        <div className="text-sm text-gray-500">
+                          Q{i + 1} ({r.category})
+                        </div>
+                        <div className="font-medium text-gray-900 mt-1">
+                          {r.question}
+                        </div>
+                        <div className="mt-2 text-gray-700">
+                          <span className="text-sm text-gray-500">
+                            Transcript:
+                          </span>
+                          <div className="mt-1 whitespace-pre-wrap">
+                            {r.transcript}
+                          </div>
+                        </div>
+                        <div className="mt-3 grid md:grid-cols-3 gap-3 text-sm">
+                          <div className="p-2 bg-white rounded border">
+                            <div className="text-gray-500">Technical</div>
+                            <div className="font-semibold">
+                              {r.evaluation?.technicalDepth?.score ?? "-"} / 5
+                            </div>
+                          </div>
+                          <div className="p-2 bg-white rounded border">
+                            <div className="text-gray-500">Clarity</div>
+                            <div className="font-semibold">
+                              {r.evaluation?.clarity?.score ?? "-"} / 5
+                            </div>
+                          </div>
+                          <div className="p-2 bg-white rounded border">
+                            <div className="text-gray-500">Confidence</div>
+                            <div className="font-semibold">
+                              {r.evaluation?.confidence?.score ?? "-"} / 5
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-3 text-sm">
+                          <span className="text-gray-500">Sentiment:</span>
+                          <span className="ml-2 font-medium capitalize">
+                            {r.evaluation?.sentiment ?? "n/a"}
+                          </span>
+                        </div>
+                        {r.evaluation?.flags && (
+                          <div className="mt-2 text-xs text-gray-600">
+                            Flags:{" "}
+                            {r.evaluation.flags.reading ? "reading " : ""}
+                            {r.evaluation.flags.silence ? "silence " : ""}
+                            {r.evaluation.flags.irrelevant ? "irrelevant" : ""}
+                          </div>
+                        )}
+                        {r.videoAnalysis && (
+                          <div className="mt-3 text-sm">
+                            <div className="text-gray-500">Video analysis:</div>
+                            <div className="mt-1">
+                              {r.videoAnalysis.notes ||
+                                "No significant issues detected."}
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              Attention lost:{" "}
+                              {r.videoAnalysis.attentionLostSeconds ?? 0}s ·
+                              Multiple faces:{" "}
+                              {r.videoAnalysis.multipleFacesDetected
+                                ? "Yes"
+                                : "No"}{" "}
+                              · No face:{" "}
+                              {r.videoAnalysis.noFaceDetected ? "Yes" : "No"}
+                            </div>
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
 
@@ -176,7 +262,9 @@ const ResultsPage: React.FC = () => {
                   <div>
                     <h3 className="font-medium text-gray-900">Summary</h3>
                     <p className="mt-2 text-gray-700">
-                      {report.summary?.summary || report.summary}
+                      {typeof report?.summary?.summary === "string"
+                        ? report.summary.summary
+                        : ""}
                     </p>
                   </div>
                   <div>

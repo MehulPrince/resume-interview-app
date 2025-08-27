@@ -65,6 +65,12 @@ const responseSchema = new mongoose.Schema({
       max: 5
     }
   },
+  videoAnalysis: {
+    notes: { type: String },
+    attentionLostSeconds: { type: Number, default: 0 },
+    multipleFacesDetected: { type: Boolean, default: false },
+    noFaceDetected: { type: Boolean, default: false }
+  },
   duration: {
     type: Number // in seconds
   }

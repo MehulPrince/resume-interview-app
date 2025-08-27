@@ -61,8 +61,34 @@ const Dashboard: React.FC = () => {
         resumeAPI.getAll(),
         interviewAPI.getAll(),
       ]);
-      setResumes(resumesRes.data);
-      setInterviews(interviewsRes.data);
+      const safeResumes = (
+        Array.isArray(resumesRes.data) ? resumesRes.data : []
+      ).map((r: any) => ({
+        ...r,
+        parsedData: {
+          skills: Array.isArray(r?.parsedData?.skills)
+            ? r.parsedData.skills
+            : [],
+          projects: Array.isArray(r?.parsedData?.projects)
+            ? r.parsedData.projects
+            : [],
+          internships: Array.isArray(r?.parsedData?.internships)
+            ? r.parsedData.internships
+            : [],
+          education: Array.isArray(r?.parsedData?.education)
+            ? r.parsedData.education
+            : [],
+          experience: Array.isArray(r?.parsedData?.experience)
+            ? r.parsedData.experience
+            : [],
+        },
+      }));
+      setResumes(safeResumes);
+
+      const safeInterviews = Array.isArray(interviewsRes.data)
+        ? interviewsRes.data
+        : [];
+      setInterviews(safeInterviews);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -300,7 +326,7 @@ const Dashboard: React.FC = () => {
                       Skills Found:
                     </h4>
                     <div className="flex flex-wrap gap-1">
-                      {resume.parsedData.skills
+                      {(resume.parsedData?.skills || [])
                         .slice(0, 5)
                         .map((skill, index) => (
                           <span
@@ -310,9 +336,9 @@ const Dashboard: React.FC = () => {
                             {skill}
                           </span>
                         ))}
-                      {resume.parsedData.skills.length > 5 && (
+                      {(resume.parsedData?.skills || []).length > 5 && (
                         <span className="text-xs text-gray-500">
-                          +{resume.parsedData.skills.length - 5} more
+                          +{(resume.parsedData?.skills || []).length - 5} more
                         </span>
                       )}
                     </div>
@@ -388,7 +414,10 @@ const Dashboard: React.FC = () => {
                       <tr key={interview._id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
-                            {interview.resumeId.fileName}
+                            {interview?.resumeId &&
+                            (interview as any).resumeId.fileName
+                              ? (interview as any).resumeId.fileName
+                              : "Resume"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

@@ -111,11 +111,7 @@ router.get('/report/:reportId', auth, async (req, res) => {
         path: 'interviewId',
         match: { userId: req.user._id },
         populate: {
-          path: 'questions',
-          populate: {
-            path: 'responses',
-            model: 'Response'
-          }
+          path: 'questions'
         }
       });
 
@@ -166,6 +162,7 @@ router.get('/:interviewId/summary', auth, async (req, res) => {
         category: response.questionId.category,
         transcript: response.transcript,
         evaluation: response.evaluation,
+        videoAnalysis: response.videoAnalysis,
         duration: response.duration
       }))
     };
